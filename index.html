@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+<script>
+  window.TrackJS && TrackJS.install({ 
+    token: "e36f24697ad24bb8a5246d73adcc642f"
+    // for more configuration options, see https://docs.trackjs.com
+  });
+</script>
+                                
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -69,21 +77,21 @@
     </form>
 
     <section id="error-btns">
-      <button>Console Log</button>
-      <button>Console Error</button>
-      <button>Console Count</button>
-      <button>Console Warn</button>
-      <button>Console Assert</button>
-      <button>Console Clear</button>
-      <button>Console Dir</button>
-      <button>Console dirxml</button>
-      <button>Console Group Start</button>
-      <button>Console Group End</button>
-      <button>Console Table</button>
-      <button>Start Timer</button>
-      <button>End Timer</button>
-      <button>Console Trace</button>
-      <button>Trigger a Global Error</button>
+      <button onclick="console.log('Console Log Demo')">Console Log</button>
+      <button onclick="console.error('Console Error Demo')">Console Error</button>
+      <button onclick="console.count('Console Count Demo')">Console Count</button>
+      <button onclick="console.warn('Console Warn Demo')">Console Warn</button>
+      <button onclick="console.assert(1==0, 'Console Assert Demo')">Console Assert</button>
+      <button onclick="console.clear()">Console Clear</button>
+      <button onclick="console.dir(document.body)">Console Dir</button>
+      <button onclick="console.dirxml(document)">Console dirxml</button>
+      <button onclick="console.group('Console Group Demo')">Console Group Start</button>
+      <button onclick="console.groupEnd('Console Group Demo End')">Console Group End</button>
+      <button onclick="console.table([{ column1: 'value1', column2: 'value2' }])">Console Table</button>
+      <button onclick="console.time('Timer Demo')">Start Timer</button>
+      <button onclick="console.timeEnd('Timer Demo')">End Timer</button>
+      <button onclick="console.trace('Console Trace Demo')">Console Trace</button>
+      <button onclick="triggeringError()">Trigger a Global Error</button>
     </section>
   </main>
 
@@ -95,13 +103,54 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      // output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      
+      try {
+        if (isNaN(firstNum) || isNaN(secondNum)) {
+          throw new Error("Both inputs must be valid numbers.");
+        }
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      
+      } catch (error) {
+        output.innerHTML = error.message;
+
+        console.error(error);
+        TrackJS.track(error);
+
+        throw new BadInputError();
+      
+      } finally {
+        if (false) {
+          console.error('Error Detected')
+        }
+        console.log('Calculation attempted');
+      }
+    
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
     // Start your code here
     // You may move this JS to another file if you wish
+    function triggeringError() {
+      try {
+        // Intentionally causing a reference error
+        nonExistentFunction();
+      } 
+      catch (error) {
+        console.error("Caught this error: ", error);
+      } 
+      finally {
+        console.log("Completed the error handling.");
+      }
+    }
+
+    class BadInputError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "badInputThrowsError";
+      }
+    }
   </script>
 </body>
 
